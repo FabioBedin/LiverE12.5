@@ -42,14 +42,14 @@ ui <- function(id) {
       )
     ),
     Stack(
-      style= "padding: 1rem;",
+      style= "margin: 1rem 2rem;",
       horizontal = TRUE,
       tokens = list(childrenGap = 15),
       makeCard(title="card1", content="ciao ciao ciao", style="height: 550px; flex-grow: 1;"),
       makeCard(title="card2", content="ciao", style="height: 550px; flex-grow: 1;")
     ),
     Stack(
-      style= "padding: 1rem;",
+      style= "margin: 1rem 2rem;",
       horizontal = TRUE,
       tokens = list(childrenGap = 15),
       makeCard(title="card3", content="ciao ciao ciao", style="height: 400px; flex-grow: 1;"),
