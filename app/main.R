@@ -2,6 +2,7 @@ box::use(
   shiny[moduleServer, NS, tags, plotOutput, renderPlot, eventReactive, observeEvent],
   shiny.fluent[fluentPage, Stack, Dropdown.shinyInput, Text, ComboBox.shinyInput],
   here[here],
+  ggplot2[theme_bw, theme, element_blank],
   Seurat[...]
 )
 
@@ -10,7 +11,7 @@ box::use(
 )
 
 box::use(
-  app/logic/umap_celltypes[UMAP_cellType],
+  app/logic/umap_celltypes[UMAP_cellType, Barplot_cellType],
 )
 
 #' @export
@@ -164,15 +165,22 @@ server <- function(id) {
         pt.size = 0.8,
         order = T,
         cols = c("lightgrey", "brown")
-      )
+      ) +  theme_bw() + theme(panel.grid = element_blank())
     })
     
     output$barplot <- renderPlot({
-      plot(1,2)
+      
+    Barplot_cellType(dataset(), input$dropdown_input)
+      
     })
     
     output$violin_plot <- renderPlot({
-      plot(1,2)
+      gene <- input$gene_input$text
+      
+      VlnPlot(
+        dataset(),
+        features = gene,
+        pt.size = 0.1) + NoLegend()
     })
   
     
