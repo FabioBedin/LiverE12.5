@@ -1,11 +1,16 @@
 box::use(
   shiny[moduleServer, NS, tags, plotOutput, renderPlot, eventReactive, observeEvent],
   shiny.fluent[fluentPage, Stack, Dropdown.shinyInput, Text, ComboBox.shinyInput],
-  here[here]
+  here[here],
+  Seurat[...]
 )
 
 box::use(
   app/view/cardUI[makeCard],
+)
+
+box::use(
+  app/logic/umap_celltypes[UMAP_cellType],
 )
 
 #' @export
@@ -46,11 +51,11 @@ ui <- function(id) {
           inputId = ns("gene_input"),
           autoComplete = 'on',
           autofill = TRUE,
-          value = list(text = "gene1"),
+          value = list(text = "Pf4"),
           options = list(
-            list(key = "gene1", text = "gene 1"),
-            list(key = "test", text = "test"),
-            list(key = "ciaocaio", text = "ciaociao")
+            list(key = "Pf4", text = "Pf4"),
+            list(key = "Plek", text = "Plek"),
+            list(key = "Cd34", text = "Cd34")
           )
         )
       )
@@ -84,13 +89,13 @@ ui <- function(id) {
       tokens = list(childrenGap = 15),
       makeCard(
         title = "Umap cell types",
-        content = plotOutput(ns("")),
+        content = plotOutput(ns("Umap1"), height = 700),
         size = 6,
         style = "height: 750px;"
       ),
       makeCard(
         title = "Gene expression",
-        content = plotOutput(ns("")),
+        content = plotOutput(ns("Umap2"), height = 700),
         size = 6,
         style = "height: 750px;"
       )
@@ -101,13 +106,13 @@ ui <- function(id) {
       tokens = list(childrenGap = 15),
       makeCard(
         title = "Number of cells in each cell type",
-        content = plotOutput(ns("")),
+        content = plotOutput(ns("barplot")),
         size = 6,
         style = "height: 450px;"
       ),
       makeCard(
         title = "Gene expression in each cell type",
-        content = plotOutput(ns("")),
+        content = plotOutput(ns("violin_plot")),
         size = 6,
         style = "height: 450px;"
       )
@@ -139,6 +144,31 @@ server <- function(id) {
       
       return(data)
       
+    })
+    
+    output$Umap1 <- renderPlot({
+      UMAP_cellType(dataset())
+    })
+    
+    output$Umap2 <- renderPlot({
+      
+      gene <- input$gene_input$text
+      
+      FeaturePlot(
+        dataset(),
+        features = gene,
+        pt.size = 0.8,
+        order = T,
+        cols = c("lightgrey", "brown")
+      )
+    })
+    
+    output$barplot <- renderPlot({
+      plot(1,2)
+    })
+    
+    output$violin_plot <- renderPlot({
+      plot(1,2)
     })
   
     
