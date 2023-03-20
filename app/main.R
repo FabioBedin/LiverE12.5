@@ -1,6 +1,7 @@
 box::use(
-  shiny[moduleServer, NS, tags, plotOutput, renderPlot, eventReactive],
-  shiny.fluent[fluentPage, Stack, Dropdown.shinyInput, Text, ComboBox.shinyInput]
+  shiny[moduleServer, NS, tags, plotOutput, renderPlot, eventReactive, observeEvent],
+  shiny.fluent[fluentPage, Stack, Dropdown.shinyInput, Text, ComboBox.shinyInput],
+  here[here]
 )
 
 box::use(
@@ -58,23 +59,58 @@ ui <- function(id) {
       style= "margin: 1rem 2rem;",
       horizontal = TRUE,
       tokens = list(childrenGap = 15),
-      makeCard(title="info1", content="numero geni", size = 4, style="height: 150px;"),
-      makeCard(title="info2", content="numero cellule", size = 4, style="height: 150px;"),
-      makeCard(title="info3", content="clusters", size = 4, style="height: 150px;")
+      makeCard(
+        title = "info1",
+        content = "numero geni",
+        size = 4,
+        style = "height: 150px;"
+      ),
+      makeCard(
+        title = "info2",
+        content = "numero cellule",
+        size = 4,
+        style = "height: 150px;"
+      ),
+      makeCard(
+        title = "info3",
+        content = "clusters",
+        size = 4,
+        style = "height: 150px;"
+      )
     ),
     Stack(
       style= "margin: 1rem 2rem;",
       horizontal = TRUE,
       tokens = list(childrenGap = 15),
-      makeCard(title="card1", content="mettere grafico statico 1", size = 6, style="height: 750px;"),
-      makeCard(title="card2", content="mettere grafico dinamico 1", size = 6, style="height: 750px;")
+      makeCard(
+        title = "Umap cell types",
+        content = plotOutput(ns("")),
+        size = 6,
+        style = "height: 750px;"
+      ),
+      makeCard(
+        title = "Gene expression",
+        content = plotOutput(ns("")),
+        size = 6,
+        style = "height: 750px;"
+      )
     ),
     Stack(
       style= "margin: 1rem 2rem;",
       horizontal = TRUE,
       tokens = list(childrenGap = 15),
-      makeCard(title="card3", content="mettere grafico statico 2", size = 6, style="height: 450px;"),
-      makeCard(title="card4", content="mettere grafico dinamico 1", size = 6, style="height: 450px;")
+      makeCard(
+        title = "Number of cells in each cell type",
+        content = plotOutput(ns("")),
+        size = 6,
+        style = "height: 450px;"
+      ),
+      makeCard(
+        title = "Gene expression in each cell type",
+        content = plotOutput(ns("")),
+        size = 6,
+        style = "height: 450px;"
+      )
     ),
     Stack(
       style = "background-color: #f3f2f1; padding: 12px 20px;",
@@ -93,12 +129,18 @@ server <- function(id) {
   moduleServer(id, function(input, output, session) {
     
     dataset <- eventReactive(input$dropdown_input, {
+    
       
       if(input$dropdown_input == "dataset1"){
-        data <- readRDS()
+        data <- readRDS(file = here("app/static/combined.rds"))
+      } else{
+        data <- readRDS(file = here("app/static/subset.rds"))
       }
       
+      return(data)
+      
     })
+  
     
   })
 }
