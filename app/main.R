@@ -133,13 +133,16 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     
+    data1 <- readRDS(file = here("app/static/combined.rds"))
+    data2 <- readRDS(file = here("app/static/subset.rds"))
+    
     dataset <- eventReactive(input$dropdown_input, {
     
       
       if(input$dropdown_input == "dataset1"){
-        data <- readRDS(file = here("app/static/combined.rds"))
+        data <- data1
       } else{
-        data <- readRDS(file = here("app/static/subset.rds"))
+        data <- data2
       }
       
       return(data)
