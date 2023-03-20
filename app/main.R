@@ -55,7 +55,8 @@ ui <- function(id) {
           options = list(
             list(key = "Pf4", text = "Pf4"),
             list(key = "Plek", text = "Plek"),
-            list(key = "Cd34", text = "Cd34")
+            list(key = "Cd34", text = "Cd34"),
+            list(key = "Cbx7", text = "Cbx7")
           )
         )
       )
