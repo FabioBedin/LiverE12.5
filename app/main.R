@@ -1,17 +1,17 @@
 box::use(
   shiny[moduleServer, NS, tags, plotOutput, renderPlot, eventReactive, observeEvent, uiOutput, renderUI],
-  shiny.fluent[fluentPage, Stack, Dropdown.shinyInput, Text, ComboBox.shinyInput],
+  shiny.fluent[fluentPage, Stack, Dropdown.shinyInput, Text, ComboBox.shinyInput, SearchBox.shinyInput],
   here[here],
-  ggplot2[theme_bw, theme, element_blank],
+  ggplot2[...],
   Seurat[...]
 )
 
 box::use(
-  app/view/cardUI[makeCard],
+  app/view/cardUI[makeCard, info_box],
 )
 
 box::use(
-  app/logic/umap_celltypes[UMAP_cellType, Barplot_cellType],
+  app/logic/umap_celltypes[UMAP_cellType, Barplot_cellType, violin_plot],
 )
 
 
@@ -25,15 +25,15 @@ ui <- function(id) {
       tags$div(
         style= "display: flex; align-items: center; justify-content: center;",
         tags$span(
-          "LiverE12.5",
-          class = "ms-fontSize-32 ms-fontWeight-semibold",
+          "Mouse liverE12.5",
+          class = "ms-fontSize-42 ms-fontWeight-semibold",
           style = "color: #323130"
-        ) 
-        # tags$span(
-        #   "se serve aggiungere un sottotitolo",
-        #   class = "ms-fontSize-14 ms-fontWeight-regular",
-        #   style = "color: #605E5C; margin: 14px;"
-        # )
+        ),
+        tags$span(
+          "scRNA-seq dataset from a whole mouse E12.5 liver",
+          class = "ms-fontSize-14 ms-fontWeight-regular",
+          style = "color: #605E5C; margin: 14px;"
+        )
       ),
       tags$div(
         style= "display: flex; align-items: center; justify-content: center;",
@@ -48,39 +48,34 @@ ui <- function(id) {
           )
         ),
         Text(variant = "large", "Gene: ", style = "margin: 0 1rem"),
-        ComboBox.shinyInput(
-          style="width: 200px;",
-          inputId = ns("gene_input"),
-          autoComplete = 'on',
-          autofill = TRUE,
-          value = list(text = "Pf4"),
-          # options = otp,
-          options = list(
-            list(key = "Pf4", text = "Pf4"),
-            list(key = "Plek", text = "Plek"),
-            list(key = "Cd34", text = "Cd34"),
-            list(key = "Cbx7", text = "Cbx7")
-          )
-        )
+        # ComboBox.shinyInput(
+        #   style="width: 200px;",
+        #   inputId = ns("gene_input"),
+        #   autoComplete = 'on',
+        #   autofill = TRUE,
+        #   value = list(text = "Rhd"),
+        #   options = geni
+        # )
+        SearchBox.shinyInput(inputId = ns("gene_input"), value = "Rhd")
       )
     ),
     Stack(
       style= "margin: 1rem 2rem;",
       horizontal = TRUE,
       tokens = list(childrenGap = 15),
-      makeCard(
-        title = "Number of genes:",
-        content = "15158",
-        size = 4,
-        style = "height: 75px; display: flex; align-items: center; justify-content: center;"
-      ),
-      makeCard(
+      info_box(
         title = "Number of cells:",
         content = uiOutput(ns("text_cells")),
         size = 4,
         style = "height: 75px; display: flex; align-items: center; justify-content: center;"
       ),
-      makeCard(
+      info_box(
+        title = "Number of genes:",
+        content = "15158",
+        size = 4,
+        style = "height: 75px; display: flex; align-items: center; justify-content: center;"
+      ),
+      info_box(
         title = "Number of cell types:",
         content =  uiOutput(ns("text_types")),
         size = 4,
@@ -92,7 +87,7 @@ ui <- function(id) {
       horizontal = TRUE,
       tokens = list(childrenGap = 15),
       makeCard(
-        title = "Umap cell types",
+        title = "UMAP cell types",
         content = plotOutput(ns("Umap1"), height = 700),
         size = 6,
         style = "height: 750px;"
@@ -165,32 +160,34 @@ server <- function(id) {
     output$text_types <- renderUI({
       
       data <- dataset()
-      
-      if(input$dropdown_input == "dataset1"){
-        length(unique(data@meta.data$def_cluster))
-      } else{
-        length(unique(data@meta.data$celltype))
-      }
+      length(unique(data@meta.data$def_cluster))
       
     })
     
    
     output$Umap1 <- renderPlot({
       
-      UMAP_cellType(dataset())
+      UMAP_cellType(dataset(), input$dropdown_input)
     })
     
     output$Umap2 <- renderPlot({
       
-      gene <- input$gene_input$text
+      gene <- input$gene_input
       
       FeaturePlot(
         dataset(),
         features = gene,
-        pt.size = 0.8,
+        pt.size = 2.3,
         order = T,
-        cols = c("lightgrey", "brown")
-      ) +  theme_bw() + theme(panel.grid = element_blank())
+        cols = c("lightgrey", "brown")) + 
+        labs(y = "UMAP 2", x = "UMAP 1") + 
+        theme_bw() + 
+        theme(panel.grid = element_blank(),
+              plot.title = element_blank(),
+              axis.text = element_text(size=15),
+              axis.title = element_text(size=15), 
+              legend.direction = "horizontal",
+              legend.position = c(0.1,0.95))
     })
     
     output$barplot <- renderPlot({
@@ -200,45 +197,9 @@ server <- function(id) {
     })
     
     output$violin_plot <- renderPlot({
-      gene <- input$gene_input$text
+      gene <- input$gene_input
       
-      # if(input$dropdown_input == "dataset1"){
-      #   color = list(
-      #     "EryP" = "#5e4fa2",
-      #     "Ery6" = "#9e0142",
-      #     "Ery5" = "#d53e4f",
-      #     "Ery4" = "#f46d43",
-      #     "Ery3" = "#fdae61",
-      #     "Ery2" = "#fee08b",
-      #     "Ery1" = "#FFF05A",
-      #     "Mk"   = "#abd9e9",
-      #     "Imm"  = "#2166ac",
-      #     "Endo" = "#de77ae",
-      #     "Hepa" = "#33a02c"
-      #   )
-      # }else{
-      #   color = list(
-      #     "pre-HSPCs/HSCs" = "#08519c",
-      #     "Lymphoid Progenitors" = "#810f7c",
-      #     "EMPs/MMPs" = "#8c96c6",
-      #     "GMPs" = "#02818a",
-      #     "Granulocyte Progenitors" = "#238443",
-      #     "Neutrophils" = "#78c679",
-      #     "Monocytes" = "#7fcdbb",
-      #     "Kupffer cells" = "#1d91c0",
-      #     "MEPs" = "#cb181d",
-      #     "Megakaryoblasts" = "#ae017e",
-      #     "Megakaryocytes" = "#fa9fb5",
-      #     "BFU-E" = "#fd8d3c",
-      #     "hepatic stellate cells" = "#F5DF51"
-      #   )
-      # }
-      
-      VlnPlot(
-        dataset(),
-        features = gene,
-        # cols = color,
-        pt.size = 0) + NoLegend()
+      violin_plot(dataset(), gene, input$dropdown_input)
     })
   
     

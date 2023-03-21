@@ -4,6 +4,10 @@ box::use(
   Seurat[...],
 )
 
+box::use(
+  app/logic/constants[color_all, color_subset]
+)
+
 
 theme_seurat_box <- function() {
   theme_bw() + 
@@ -11,72 +15,77 @@ theme_seurat_box <- function() {
 }
 
 #' @export
-UMAP_cellType <-  function(object) {
+UMAP_cellType <-  function(object, type) {
   
+  color=NULL
   
-  # if(type == "dataset1"){
-  #   color = list(
-  #     "EryP" = "#5e4fa2",
-  #     "Ery6" = "#9e0142",
-  #     "Ery5" = "#d53e4f",
-  #     "Ery4" = "#f46d43",
-  #     "Ery3" = "#fdae61",
-  #     "Ery2" = "#fee08b",
-  #     "Ery1" = "#FFF05A",
-  #     "Mk"   = "#abd9e9",
-  #     "Imm"  = "#2166ac",
-  #     "Endo" = "#de77ae",
-  #     "Hepa" = "#33a02c"
-  #   )
-  # }else{
-  #   color = list(
-  #     "pre-HSPCs/HSCs" = "#08519c",
-  #     "Lymphoid Progenitors" = "#810f7c",
-  #     "EMPs/MMPs" = "#8c96c6",
-  #     "GMPs" = "#02818a",
-  #     "Granulocyte Progenitors" = "#238443",
-  #     "Neutrophils" = "#78c679",
-  #     "Monocytes" = "#7fcdbb",
-  #     "Kupffer cells" = "#1d91c0",
-  #     "MEPs" = "#cb181d",
-  #     "Megakaryoblasts" = "#ae017e",
-  #     "Megakaryocytes" = "#fa9fb5",
-  #     "BFU-E" = "#fd8d3c",
-  #     "hepatic stellate cells" = "#F5DF51"
-  #   )
-  # }
-  # 
+  if(type == "dataset1"){
+    color <- color_all
+  }else{
+    color <- color_subset
+  }
   
   
   UMAP = DimPlot(object,
-                 # cols = color,
-                 pt.size = 0.8) +
+                 pt.size = 2.3, raster = FALSE) +
     labs(y = "UMAP 2", x = "UMAP 1") +
-    theme_seurat_box() +
+    theme_seurat_box() + theme_bw() +
+    scale_color_manual(values = alpha(color, 0.5))+
+    theme(panel.grid = element_blank(),
+          plot.title = element_blank(),
+          axis.text = element_text(size=15),
+          axis.title = element_text(size=15))+
     NoLegend()
   
   LabelClusters(UMAP,
                 id = 'ident',
                 box = T,
-                position = 'nearest')
+                position = 'nearest', size = 10, fill = "white")
 }
 
 #' @export
 Barplot_cellType = function(object, type) {
   
+  color=NULL
+  
   if(type == "dataset1"){
-    tab_cluster = as.data.frame(table(object$def_cluster))
+    color <- color_all
   }else{
-    tab_cluster = as.data.frame(table(object$celltype))
+    color <- color_subset
   }
   
+  tab_cluster = as.data.frame(table(object$def_cluster))
+
   ggplot(tab_cluster, aes(x = Var1, y = Freq, fill = Var1)) +
     geom_bar(stat = "identity", show.legend = F) + theme_classic() +
-    labs(x = NULL, y = NULL) + theme(axis.ticks.y = element_blank(), axis.text.y = element_blank()) +
-    theme_seurat_box()
+    labs(x = NULL, y = NULL) + theme_bw() + 
+    scale_fill_manual(values = color)+
+    theme(panel.grid = element_blank(),
+          axis.text.x = element_text(angle = 45, hjust=1, size=15),
+          axis.text.y = element_text(size=15),
+          axis.ticks.y = element_blank())
 }
 
 
 
-
+#' @export
+violin_plot <- function(object, gene, type) {
+  
+  if(type == "dataset1"){
+    color <- color_all
+  }else{
+    color <- color_subset
+  }
+  
+  VlnPlot(
+    object,
+    features = gene,
+    cols = color,
+    pt.size = 0) +  theme_bw() + 
+    theme(panel.grid = element_blank(),
+          axis.text.y = element_text(size=15),
+          plot.title = element_blank(),
+          axis.title= element_blank(),
+          axis.text.x = element_text(angle = 45, hjust=1, size=15)) + NoLegend()
+}
 
