@@ -27,9 +27,9 @@ UMAP_cellType <-  function(object, type) {
   
   
   UMAP = DimPlot(object,
-                 pt.size = 2.3, raster = FALSE) +
+                 pt.size = 2.3) +
     labs(y = "UMAP 2", x = "UMAP 1") +
-    theme_seurat_box() + theme_bw() +
+    theme_seurat_box() + 
     scale_color_manual(values = alpha(color, 0.5))+
     theme(panel.grid = element_blank(),
           plot.title = element_blank(),

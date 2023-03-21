@@ -12,7 +12,7 @@ makeCard <- function(title, content, size = 12, style = "") {
     style = glue("padding: 1rem; background-color: #fff; {style}"),
     Stack(
       tokens = list(childrenGap = 5),
-      Text(variant = "xLarge", title, block = TRUE),
+      Text(variant = "xLarge", title, block = TRUE, style = "display: flex; align-items: center; justify-content: center;"),
       content
     )
   )
@@ -31,6 +31,24 @@ info_box <- function(title, content, size = 12, style = "") {
         Text(variant = "xxLarge", title, block = TRUE),
         Text(variant = "xxLarge", content, block = TRUE, style="margin-left: 1rem;"),
       )
+    )
+  )
+}
+
+#' @export
+makeCard_gene <- function(title, gene, content, size = 12, style = "") {
+  tags$div(
+    class = glue("card ms-depth-8 ms-sm12 ms-xxxl{size}"),
+    style = glue("padding: 1rem; background-color: #fff; {style}"),
+    Stack(
+      tokens = list(childrenGap = 5),
+      Stack(
+        horizontal = TRUE,
+        style = "display: flex; align-items: center; justify-content: center;",
+        Text(variant = "xLarge", title, block = TRUE),
+        Text(variant = "xLarge", gene, block = TRUE, style="margin-left: 1rem; font-weight: bold;"),
+      ),
+      content
     )
   )
 }
